@@ -1,0 +1,68 @@
+mkdir k8s-file-server
+cd k8s-file-server
+
+Hello from Kubernetes! 🌐🚀
+.
+FROM python:3.9-slim
+WORKDIR /app
+COPY hello.txt .
+EXPOSE 8000
+CMD ["python3", "-m", "http.server", "8000"]
+
+
+docker build -t your-dockerhub-username/file-server:latest .
+docker push your-dockerhub-username/file-server:latest
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: file-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: file-server
+  template:
+    metadata:
+      labels:
+        app: file-server
+    spec:
+      containers:
+      - name: file-server
+        image: your-dockerhub-username/file-server:latest
+        ports:
+        - containerPort: 8000
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: file-server-service
+spec:
+  selector:
+    app: file-server
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: LoadBalancer  # use NodePort if on minikube
+
+
+
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+kubectl get pods
+kubectl get svc
+
+
+minikube service file-server-service
+
+
+hello.txt
+
+
+Hello from Kubernetes! 🌐🚀
+
+
+
